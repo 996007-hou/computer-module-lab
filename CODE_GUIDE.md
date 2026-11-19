@@ -1,43 +1,41 @@
-# 计算机模块实验室代码导览
+# 教师个性化修改指南
 
-项目用 Godot 和 GDScript 编写。`.gd` 文件里既有界面代码，也有实验逻辑。要改某一章，可以先判断改的是**教材文字、按钮操作，还是计算规则**。
+这份指南给教师和协助改课件的 AI 使用。把**章号、要改的内容、希望看到的效果**发给 AI，再让它按下表读取对应的文件和函数。函数名可以在编辑器内直接搜索，代码移动后仍然能找到。
 
-## 章节从哪里打开
+## 先选要改什么
 
-1. [project.godot](project.godot) 指定启动场景 [main.tscn](main.tscn)，场景挂载 [main.gd](main.gd)。
-2. `main.gd` 的 `_build_chapters()` 创建章节入口，`_open_chapter()` 决定点击后打开哪个页面。第 1～3、8、9 章使用统一的章节页，第 4～7 章进入组合工作区。
-3. [chapter_intro.gd](chapter_intro.gd) 的 `LABS` 把章节编号绑定到实验脚本，`_open_lab()` 创建实验，`_show_mode()` 切换「动手实验」和「知识点与练习」。`LESSONS` 保存章节标题与默认步骤。
-4. [chapter_material.gd](chapter_material.gd) 的 `CONTENT` 按章号保存知识点、练习题和答案解析。`name` 是知识点名称，`context` 是讲解，`steps` 是分步示意，`options`、`answer` 和 `why` 分别是选项、正确选项的下标和解析。答案下标从 `0` 开始。没有单独填写 `steps` 时，章节页使用 `LESSONS` 中的默认步骤。
+- **改知识点或练习。** 第 1～3、8、9 章从 [chapter_material.gd](chapter_material.gd) 对应的 `CONTENT[章号]` 开始。讲解用 `context`，分步示意用 `steps`。练习用 `quiz`、`options`、`answer` 和 `why`，正确选项的下标从 `0` 开始。知识点缺少独立的 `steps` 或 `question` 时，默认内容来自 [chapter_intro.gd](chapter_intro.gd) 的 `LESSONS[章号]`。
+- **改实验展示。** 从下表的「展示与默认值」开始。调整卡片、图表、配色、按钮提示或初始数据时，先读列出的界面函数。
+- **改实验规则。** 从下表的「规则与验证」开始，并查看那一章的测试。涉及多个页面时，再读取共享界面或导航代码。
 
-## 第 1～3 章具体改哪里
+## 按章定位
 
-| 想改的内容 | 文件与定位 |
+| 章与实验 | 展示与默认值 | 规则与验证 |
+| --- | --- | --- |
+| 1 操作系统概述 · 文件读取 | [read_file_lab.gd](read_file_lab.gd) 的 `CACHE_PATH`、`DISK_PATH` 保存缓存和磁盘两套步骤。`CACHE_LINKS`、`DISK_LINKS` 与 `render()` 控制箭头、卡片和事件记录。 | 同文件的 `selected_path()`、`next_event()` 控制读取路径和事件推进。 |
+| 2 进程、线程管理 · PCB 与换班 | [process_states_lab.gd](process_states_lab.gd) 的 `GUIDE` 改新手引导顺序和文案，`update_actions()` 改推荐按键，`render()` 改队列和 PCB 卡片。 | 同文件的 `dispatch()`、`expire_slice()`、`block_for_io()`、`finish_io()` 和 `execute_instruction()` 控制进程状态和执行进度。 |
+| 3 进程同步与通信 · 水果盘、信号量 | 水果盘在 [fruit_sync_lab.gd](fruit_sync_lab.gd) 的 `GUIDE`、`update_guide()` 和 `render()`。独立 P/V 实验的按钮、课堂示范和画面在 [semaphore_lab.gd](semaphore_lab.gd) 的 `_ready()`、`_advance_demo()` 和 `_render()`。 | 水果盘的放取和等待状态在 `put_fruit()`、`take_fruit()`。P/V 规则在 [semaphore_model.gd](semaphore_model.gd) 的 `p()`、`v()`、`resume_process()`，用 [semaphore_test.gd](tests/semaphore_test.gd) 验证。 |
+| 4 处理机调度 | [schedule.gd](schedule.gd) 的 `_ready()` 设置算法菜单和默认数据，`_render()` 显示候选进程与指标，时间轴在 [schedule_view.gd](schedule_view.gd)。 | [schedule_model.gd](schedule_model.gd) 的 `run()`、`_preemptive()`。对照 [schedule_test.gd](tests/schedule_test.gd) 的执行顺序、到达边界和时间片用例。 |
+| 5 死锁 · 银行家算法 | [banker.gd](banker.gd) 的 `_ready()`、`_reset()` 管理界面和默认值，`_rebuild_matrix()` 改矩阵，`_render()` 改试分配和安全序列的显示。 | [banker_model.gd](banker_model.gd) 的 `evaluate()`。对照 [banker_test.gd](tests/banker_test.gd) 检查请求超限、资源不足和安全序列。 |
+| 6 内存管理 · 动态分区、基本分页 | 分区预设在 [main.gd](main.gd) 的 `_on_preset()`，分区图在 [memory_view.gd](memory_view.gd) 的 `_draw()`。分页讲解和画面在 [paging.gd](paging.gd) 的 `_render()` 与 [paging_view.gd](paging_view.gd)。 | 分区查找、分配和紧凑在 `main.gd` 的 `_choose()`、`_allocate_now()`、`_compact()`，测试见 [smoke.gd](tests/smoke.gd)。分页的页号、偏移和物理地址在 [paging_model.gd](paging_model.gd) 的 `calculate()`，测试见 [paging_test.gd](tests/paging_test.gd)。 |
+| 7 虚拟存储 · 页面置换、地址转换图解 | [replacement.gd](replacement.gd) 的 `_ready()` 改输入与默认值，`_render()`、`_render_snapshot()` 改缺页步骤和页框图。[address_lab.gd](address_lab.gd) 的 `_render_paging()`、`_render_segments()`、`_render_segment_pages()` 对应分页、分段、段页式图解。 | FIFO、LRU 在 [replacement_model.gd](replacement_model.gd) 的 `simulate()`，测试见 [replacement_test.gd](tests/replacement_test.gd)。改地址图解时，检查页内偏移是否保持、段内越界是否被拒绝。 |
+| 8 I/O 设备管理 · 缓冲区 | [io_buffer_lab.gd](io_buffer_lab.gd) 的 `_ready()`、`load_example()` 管理输入和默认参数，`build_comparison()`、`render_comparison()` 管理 A/B 图，`render()`、`render_phases()` 管理单拍画面。 | 同文件的 `advance()`、`advance_half()`、`run_to_end()`、`receive_from_device()`、`available_transfer()` 和 `read_from_buffer()`。按下方索引选读。 |
+| 9 文件系统 · 文件块与位图 | [file_blocks_lab.gd](file_blocks_lab.gd) 的 `load_example()` 改初始文件块，`render_tiles()` 改索引、磁盘块与位图的展示。 | 同文件的 `allocate()`、`delete_file()` 和 `owner_of()` 控制分配、回收和块归属。 |
+
+第 1～3、8、9 章可在 [chapter_labs_test.gd](tests/chapter_labs_test.gd) 搜索 `app._open_chapter(章号)`，只看对应章的断言。按 [README](README.md) 配好 Godot 后，可以运行 [运行检查.bat](%E8%BF%90%E8%A1%8C%E6%A3%80%E6%9F%A5.bat)。
+
+## 第 8 章修改位置
+
+| 修改项 | AI 首先读取 [io_buffer_lab.gd](io_buffer_lab.gd) 的哪些位置 |
 | --- | --- |
-| 第 1 章的系统调用、中断和文件读取题目 | [chapter_material.gd](chapter_material.gd) 的 `CONTENT[1]`。章节默认的读文件示意在 [chapter_intro.gd](chapter_intro.gd) 的 `LESSONS[1]`。 |
-| 第 1 章「一次文件读取」的实际演示 | [read_file_lab.gd](read_file_lab.gd)。`CACHE_PATH`、`DISK_PATH` 保存缓存命中和从磁盘读取的步骤，`CACHE_LINKS`、`DISK_LINKS` 保存各步的箭头。`next_event()` 推进一步，`render()` 更新卡片、连接和记录。 |
-| 第 2 章的进程、线程、上下文切换与 PCB 题目 | [chapter_material.gd](chapter_material.gd) 的 `CONTENT[2]`。默认的状态变化示意在 [chapter_intro.gd](chapter_intro.gd) 的 `LESSONS[2]`。 |
-| 第 2 章「P2 怎么进入 CPU」和新手引导 | [process_states_lab.gd](process_states_lab.gd)。`GUIDE` 保存换班步骤，`update_actions()` 控制按钮提示。`dispatch()` 把就绪队首送上 CPU，`expire_slice()` 把原进程放回队尾，`block_for_io()` 和 `finish_io()` 分别处理阻塞和回到就绪。当前指令位置和 PCB 卡片的显示在 `execute_instruction()` 和 `render()`。 |
-| 第 3 章的临界区、竞争条件、生产者消费者与 P/V 题目 | [chapter_material.gd](chapter_material.gd) 的 `CONTENT[3]`。默认互斥示意在 [chapter_intro.gd](chapter_intro.gd) 的 `LESSONS[3]`。 |
-| 第 3 章水果盘的放取、等待、唤醒和高亮 | [fruit_sync_lab.gd](fruit_sync_lab.gd)。`GUIDE` 保存引导顺序，`put_fruit()` 与 `take_fruit()` 更新盘子和等待状态，`render()` 刷新生产者和消费者卡片，`update_guide()` 决定下一步提示。 |
-| 第 3 章独立的「信号量 P / V 实验」 | [main.gd](main.gd) 的 `_open_semaphore()` 打开工作区实验。[semaphore_lab.gd](semaphore_lab.gd) 处理按钮、演示顺序与状态显示，[semaphore_model.gd](semaphore_model.gd) 的 `p()`、`v()`、`resume_process()` 处理申请、释放、唤醒和恢复运行。 |
+| A/B 对比图布局、图例、等待提示 | `build_comparison()` 的 `examples` 容器负责组别布局，`render_comparison()` 负责数据和等待提示。 |
+| 容量、速率和拍数的默认值 | `_ready()` 设置容量、设备产生速率、A 组读取速率和拍数，`build_comparison()` 设置 B 组读取速率，`load_example()` 恢复预设。改预设时检查对应按钮文字和测试期望值。 |
+| 按拍显示的收支表 | `_ready()` 里的「最近四拍的收支」创建表格，`render()` 填充表格。`read_from_buffer()` 写入 `history`。 |
+| 单拍执行的顺序 | `advance()`、`advance_half()`、`run_to_end()` 决定如何推进，`receive_from_device()` 与 `read_from_buffer()` 执行两个阶段，`render_phases()` 显示阶段状态。调整顺序时同步检查三个推进入口、拍末记录、讲解和测试。 |
 
-例如，要改「时间片到期后请调度 P2」的引导文字，在 `process_states_lab.gd` 搜索 `GUIDE`。要改时间片到期时进程去了哪个队列，则查看 `expire_slice()`。
+定位不够时，先在对应文件搜索界面上看到的标题或按钮文字，再顺着该函数查看直接调用的代码。
 
-## 其他章节的入口
+## 涉及共享界面时再查
 
-| 章节 | 界面与实验逻辑 |
-| --- | --- |
-| 第 4 章 处理机调度 | [schedule.gd](schedule.gd) 显示候选进程、时间线和周转指标，[schedule_model.gd](schedule_model.gd) 的 `run()` 计算调度顺序。 |
-| 第 5 章 银行家算法 | [banker.gd](banker.gd) 处理矩阵输入和分步演示，[banker_model.gd](banker_model.gd) 的 `evaluate()` 处理试分配、安全检查与安全序列。 |
-| 第 6 章 内存管理 | [main.gd](main.gd) 的 `_choose()`、`_allocate_now()` 和 `_compact()` 处理动态分区，[memory_view.gd](memory_view.gd) 绘制分区。基本分页的界面和计算在 [paging.gd](paging.gd) 与 [paging_model.gd](paging_model.gd)。 |
-| 第 7 章 虚拟存储 | [replacement.gd](replacement.gd) 显示命中、缺页和换出情况，[replacement_model.gd](replacement_model.gd) 的 `simulate()` 计算 FIFO 和 LRU。分页、分段、段页式的地址转换图解在 [address_lab.gd](address_lab.gd)，第 6、7 章都能进。 |
-| 第 8 章 I/O 设备管理 | [io_buffer_lab.gd](io_buffer_lab.gd) 的 `receive_from_device()` 和 `read_from_buffer()` 处理一拍的两步，`render_comparison()` 更新速度对比图。 |
-| 第 9 章 文件系统 | [file_blocks_lab.gd](file_blocks_lab.gd) 的 `allocate()`、`delete_file()` 和 `render_tiles()` 处理磁盘块分配、回收与位图显示。 |
-
-第 1～3、8、9 章共用的实验卡片、按钮和字号适配在 [chapter_lab.gd](chapter_lab.gd)。首页布局在 [main.gd](main.gd) 的 `_build_home()`，全局颜色和按钮样式从 `_ready()` 查起。
-
-## 修改后到哪里验证
-
-- 第 1～3 章的读取流程、P1/P2 换班、消费者唤醒和新手引导，查 [tests/chapter_labs_test.gd](tests/chapter_labs_test.gd) 中对应的 `app._open_chapter(1)`、`app._open_chapter(2)` 和 `app._open_chapter(3)`。
-- 独立的信号量实验查 [tests/semaphore_test.gd](tests/semaphore_test.gd)。其他调度、银行家算法、分页和置换的测试也在 [tests](tests) 目录。
-- 按 [README](README.md) 准备 Godot 后，在 Windows 终端运行 [运行检查.bat](%E8%BF%90%E8%A1%8C%E6%A3%80%E6%9F%A5.bat) 执行整套回归检查。改界面或说明文字时，再打开对应章节查看实际显示。
+- 全局颜色、按钮样式和首页布局在 [main.gd](main.gd) 的 `_ready()`、`_build_home()`。章节选择由 `_build_chapters()`、`_open_chapter()` 管理。
+- 第 1～3、8、9 章共用 [chapter_intro.gd](chapter_intro.gd) 的 `LABS`、`_open_lab()`、`_show_mode()` 实现实验入口和讲解切换。公用的卡片、按钮和字号适配在 [chapter_lab.gd](chapter_lab.gd)。
