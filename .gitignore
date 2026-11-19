@@ -1,0 +1,11 @@
+/.godot/
+/runtime/
+/tools/
+
+# Historical one-off scripts that rewrite the project files.
+/adjust_ui.py
+/extend_module_tests.py
+/extend_tests.py
+/rebuild_modules.py
+/theme_ui.py
+/update_ui.py
