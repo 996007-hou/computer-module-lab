@@ -16,7 +16,15 @@ try {
     $ProgressPreference = 'SilentlyContinue'
     [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
     Invoke-WebRequest -UseBasicParsing -Uri $archiveUrl -OutFile $download -TimeoutSec 180
-    if ((Get-FileHash -LiteralPath $download -Algorithm SHA512).Hash -ne $officialSha512) {
+    $checksum = [Security.Cryptography.SHA512]::Create()
+    $archiveStream = [IO.File]::OpenRead($download)
+    try {
+        $actualSha512 = [BitConverter]::ToString($checksum.ComputeHash($archiveStream)).Replace('-', '')
+    } finally {
+        $archiveStream.Dispose()
+        $checksum.Dispose()
+    }
+    if ($actualSha512 -ne $officialSha512) {
         throw 'The downloaded Godot ZIP did not match the official checksum.'
     }
 
@@ -39,7 +47,7 @@ try {
     }
     Write-Host 'Godot is ready. The next launch will reuse it.'
 } catch {
-    Write-Host "Could not prepare Godot. Check the internet connection and try again. $($_.Exception.Message)"
+    Write-Host "Could not prepare Godot: $($_.Exception.Message)"
     exit 1
 } finally {
     if (Test-Path -LiteralPath $download) { Remove-Item -LiteralPath $download }
