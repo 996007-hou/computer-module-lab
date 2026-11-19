@@ -7,7 +7,10 @@
 
 ## 启动
 
-下载并解压 [Godot 4.4.1 Windows 64 位版](https://github.com/godotengine/godot/releases/tag/4.4.1-stable)，将 `Godot_v4.4.1-stable_win64.exe` 和 `Godot_v4.4.1-stable_win64_console.exe` 放入仓库根目录的 `tools` 文件夹。双击 `启动实验室.bat` 打开软件，也可以用 Godot 导入 `project.godot` 并按 F5 运行项目。
+- **直接体验**。从 [GitHub 发布页](https://github.com/996007-hou/computer-module-lab/releases/latest) 下载 `ComputerModuleLab-Windows-x64.exe`，双击即可运行。Godot 运行组件和实验内容已打包在同一个文件中。
+- **修改源码**。下载或克隆仓库后，双击 `启动实验室.bat`。首次运行会联网准备 Godot 4.4.1，之后会复用已经准备好的文件。也可以在 Godot 中导入 `project.godot` 并按 F5 运行项目。
+
+Windows 成品使用 [Godot Engine](https://godotengine.org/license/)，引擎与第三方组件的许可文件见 [licenses](licenses)。
 
 ## 两种开始方式
 
