@@ -2,6 +2,8 @@
 
 使用 Godot 和 GDScript 编写的 Windows 操作系统课程实验室。
 
+想查某一章的界面、算法或测试在哪个文件里，可以看[代码导览](CODE_GUIDE.md)。
+
 ## 启动
 
 下载并解压 [Godot 4.4.1 Windows 64 位版](https://github.com/godotengine/godot/releases/tag/4.4.1-stable)，将 `Godot_v4.4.1-stable_win64.exe` 和 `Godot_v4.4.1-stable_win64_console.exe` 放入仓库根目录的 `tools` 文件夹。双击 `启动实验室.bat` 打开软件，也可以用 Godot 导入 `project.godot` 并按 F5 运行项目。
