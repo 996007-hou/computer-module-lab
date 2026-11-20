@@ -36,6 +36,9 @@ func _ready():
  title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  line.add_child(title)
  line.add_child(_label("教材第 6 章 6.4 · 页表与地址转换", 13, "667788"))
+ var terms = _label("页框是物理内存中与页等大的格子。页表记录每一页放在哪个页框。", 14, "536575")
+ terms.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+ add_child(terms)
  var parameters = HBoxContainer.new()
  parameters.add_theme_constant_override("separation", 8)
  add_child(parameters)
@@ -168,7 +171,7 @@ func _render():
    detail.text = "页号从 0 开始。点击“下一步”转换地址；末页未使用 %d 字节（页内碎片）。" % info.internal_fragment
   1:
    explanation.text = "拆分地址：%d ÷ %d = 页号 %d，余数 %d。" % [info.address,size_b,info.page,info.offset]
-   detail.text = "页号 = 逻辑地址 ÷ 页大小取整；页内偏移 = 逻辑地址对页大小取余。"
+   detail.text = "逻辑地址除以页大小，整数商是页号。余数是页内偏移，也就是从该页开头算起的位置。"
   2:
    explanation.text = "查询页表：页 %d 对应物理页框 %d。" % [info.page,info.frame]
    detail.text = "页表记录页号到页框号的映射；页内偏移保持不变。"

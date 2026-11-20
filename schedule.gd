@@ -53,6 +53,7 @@ func _ready():
  quantum_label=_label("时间片",14,"536575")
  row.add_child(quantum_label)
  quantum=_field("2",42)
+ quantum.tooltip_text="时间片轮转中，进程每次可连续使用 CPU 的最长时间。"
  row.add_child(quantum)
  var reset=Button.new()
  reset.text="课堂例题"
@@ -178,7 +179,7 @@ func _render():
    detail.text=why + "  尚需运行 %d。" % event.remaining_after
  if step==data.events.size():
   metrics.text="平均周转时间 %.2f  ·  平均带权周转时间 %.2f" % [data.average_turnaround,data.average_weighted]
-  var rows: Array=[]
+  var rows: Array=["周转 = 完成时刻 − 到达时刻  ·  带权周转 = 周转时间 ÷ 实际运行时间"]
   var sorted=data.results.duplicate()
   sorted.sort_custom(func(a,b): return int(a.id.trim_prefix("P")) < int(b.id.trim_prefix("P")))
   for item in sorted:

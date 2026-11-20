@@ -47,17 +47,17 @@ var compare_read_limit := 0
 var compare_this_read := 0
 
 func _ready():
- build_intro("缓冲区满了，剩下的数据去哪了？", "把缓冲区看作有固定格数的中转站。每拍设备先放数据，程序再取数据。放不进去的数据留在设备端，下一拍优先传输。")
+ build_intro("缓冲区满了，剩下的数据去哪了？", "时间步是演示中的一次完整操作。每步设备先尝试放入，程序再尝试取走。设备没传进去的数据留到下一步优先传输。")
  input_hint = make_label("", 14, MUTED, true)
  var inputs = add_row()
  capacity = add_number(inputs, "缓冲容量", 1, 12, 9)
- device_rate = add_number(inputs, "设备每拍新产生", 0, 12, 6)
- process_rate = add_number(inputs, "A 组每拍最多取", 0, 12, 3)
+ device_rate = add_number(inputs, "设备每步新产生", 0, 12, 6)
+ process_rate = add_number(inputs, "A 组每步最多取", 0, 12, 3)
  make_button(inputs, "载入例子 9 / 6 / 3", load_example)
  add_child(input_hint)
  var actions = add_row()
- target_ticks = add_number(actions, "本轮拍数", 1, 20, 4)
- whole_tick = make_button(actions, "推进一拍", advance)
+ target_ticks = add_number(actions, "本轮步数", 1, 20, 4)
+ whole_tick = make_button(actions, "推进一个时间步", advance)
  half_tick = make_button(actions, "只看设备放入", advance_half)
  finish_run = make_button(actions, "直接跑到结束", run_to_end)
  make_button(actions, "重置进度", reset)
@@ -82,13 +82,13 @@ func _ready():
  for i in 12: slots.append(make_tile(buffer_row, 52))
  add_feedback()
 
- add_child(make_label("最近四拍的收支", 16))
+ add_child(make_label("最近四步的收支", 16))
  var table = GridContainer.new()
  table.columns = 5
  table.add_theme_constant_override("h_separation", 16)
  table.add_theme_constant_override("v_separation", 5)
  add_child(table)
- for column in ["拍次", "实际放入", "实际取走", "拍末缓冲中", "拍末设备待传"]:
+ for column in ["步次", "实际放入", "实际取走", "步末缓冲中", "步末设备待传"]:
   table.add_child(table_cell(column))
  for row in 4:
   var cells: Array[Label] = []
@@ -111,7 +111,7 @@ func build_comparison():
  compare_panel.add_theme_constant_override("separation", 8)
  add_child(compare_panel)
  var comparison_controls = add_row(compare_panel)
- compare_rate = add_number(comparison_controls, "B 组每拍最多取", 0, 12, 8)
+ compare_rate = add_number(comparison_controls, "B 组每步最多取", 0, 12, 8)
  compare_panel.add_child(make_label("两组容量和设备速度相同。橙色是设备待传的数据，蓝色在缓冲区，绿色已被程序取走。", 15, MUTED, true))
  var examples = add_row(compare_panel)
  for i in 2:
@@ -162,7 +162,7 @@ func render_comparison():
   var counts: Array = primary if group == 0 else alternative
   var shown_rate: int = rates[group] if tick == 0 else read_limits[group]
   compare_labels[group].text = "%s 组 · %s最多取 %d 块\n待传 %d  |  缓冲中 %d  |  已读走 %d" % [
-   "A" if group == 0 else "B", "每拍" if tick == 0 else "本拍", shown_rate, counts[0], counts[1], counts[2]
+   "A" if group == 0 else "B", "每步" if tick == 0 else "本步", shown_rate, counts[0], counts[1], counts[2]
   ]
   for i in 3:
    var segment: ColorRect = compare_bars[group][i]
@@ -179,13 +179,13 @@ func render_comparison():
   var shortage: int = 0
   if not intake_complete:
    shortage = read_limits[group] - read_counts[group]
-   program_status = "程序已取足 · 本拍取走 %d 块" % read_counts[group]
-   if read_limits[group] == 0: program_status = "程序本拍设为不读取"
+   program_status = "程序已取足 · 本步取走 %d 块" % read_counts[group]
+   if read_limits[group] == 0: program_status = "本步不读取（上限为 0）"
    if shortage > 0: program_status = "程序等数据 · 想取 %d 块，只取到 %d 块" % [read_limits[group], read_counts[group]]
   show_tile(device_wait_tiles[group], device_status, "waiting" if device_waits else "idle")
   show_tile(program_wait_tiles[group], program_status, "waiting" if shortage > 0 else "idle")
  if tick == 0:
-  compare_feedback.text = "两组从空缓冲区开始。推进一拍，或直接跑到结束。"
+  compare_feedback.text = "两组从空缓冲区开始。推进一个时间步，或直接跑到结束。"
  else:
   compare_feedback.text = "两组各产生 %d 块。A 组已读 %d 块，B 组已读 %d 块。" % [generated, delivered, compare_delivered]
 
@@ -219,17 +219,17 @@ func show_input_hint():
  var reader_a = int(process_rate.value)
  var reader_b = int(compare_rate.value)
  if offered > limit:
-  input_hint.text = "设备每拍产生 %d 块，缓冲区只有 %d 格。即使起初全空，也有数据要等下一拍。" % [offered, limit]
+  input_hint.text = "设备每步产生 %d 块，缓冲区只有 %d 格。即使起初全空，也有数据要等下一步。" % [offered, limit]
  elif reader_a > limit or (compare_toggle.button_pressed and reader_b > limit):
-  input_hint.text = "有一组的读取上限超过缓冲容量。程序每拍最多只能从缓冲区取出 %d 块。" % limit
+  input_hint.text = "有一组的读取上限超过缓冲容量。程序每步最多只能从缓冲区取出 %d 块。" % limit
  elif offered == 0:
   input_hint.text = "设备暂停产生新数据。接下来只会传送和读取已有的数据。"
  elif reader_a == 0 or (compare_toggle.button_pressed and reader_b == 0):
-  input_hint.text = "每拍读取设为 0 时，程序不会清空格子，缓冲区满后设备会开始排队。"
+  input_hint.text = "每步读取设为 0 时，程序不会清空格子，缓冲区满后设备会开始排队。"
  elif target_ticks.value > 12:
-  input_hint.text = "本轮有 %d 拍。可直接跑到结束，表格保留最近 4 拍。" % int(target_ticks.value)
+  input_hint.text = "本轮有 %d 步。可直接跑到结束，表格保留最近 4 步。" % int(target_ticks.value)
  else:
-  input_hint.text = "容量 1～12 格，速率 0～12 块/拍，拍数 1～20。改容量或拍数会重新开始，改速率从下一拍生效。"
+  input_hint.text = "容量 1～12 格，速率 0～12 块/步，步数 1～20。改容量或步数会重新开始，改速率从下一步生效。"
 
 func load_example():
  capacity.set_value_no_signal(9)
@@ -287,7 +287,7 @@ func receive_from_device():
  if compare_toggle.button_pressed:
   compare_admitted += available_transfer(compare_admitted, compare_delivered)
  intake_complete = true
- feedback.text = "设备端原有 %d 块待传，加上新产生的 %d 块，本拍放入 %d 块，设备端还剩 %d 块。" % [before_device, this_generated, this_admitted, pending]
+ feedback.text = "设备端原有 %d 块待传，加上新产生的 %d 块，这一步放入 %d 块，设备端还剩 %d 块。" % [before_device, this_generated, this_admitted, pending]
 
 func available_transfer(received_total: int, read_total: int) -> int:
  var waiting_blocks = generated - received_total
@@ -303,10 +303,10 @@ func read_from_buffer():
  intake_complete = false
  history.append({"tick":tick, "admitted":this_admitted, "read":this_read, "buffered":buffered, "pending":pending})
  if history.size() > history_rows.size(): history.pop_front()
- feedback.text = "本拍缓冲区有 %d 块 + 实际放入 %d 块 − 程序取走 %d 块 = 剩下 %d 块。" % [before_buffer, this_admitted, this_read, buffered]
+ feedback.text = "步初缓冲区有 %d 块 + 实际放入 %d 块 − 程序取走 %d 块 = 剩下 %d 块。" % [before_buffer, this_admitted, this_read, buffered]
  if pending > 0:
   feedback.text += " 还有 %d 块留在设备端。" % pending
- if this_read < read_limit: feedback.text += " 数据不足，程序本拍少读 %d 块。" % (read_limit - this_read)
+ if this_read < read_limit: feedback.text += " 数据不足，程序这一步少读 %d 块。" % (read_limit - this_read)
 
 func render():
  var limit = int(capacity.value)
@@ -317,11 +317,11 @@ func render():
  half_tick.disabled = finished
  finish_run.disabled = finished
  if finished:
-  progress.text = "本轮已结束 · %d / %d 拍。图中保留最后一拍的数据，可以重置再试。" % [tick, target]
+  progress.text = "本轮已结束 · %d / %d 步。图中保留最后一步的数据，可以重置再试。" % [tick, target]
  elif intake_complete:
-  progress.text = "第 %d / %d 拍 · 设备已放入，等程序取走后才算完成这一拍。" % [tick, target]
+  progress.text = "第 %d / %d 步 · 设备已放入，等程序取走后才算完成这一步。" % [tick, target]
  else:
-  progress.text = "已完成 %d / %d 拍 · 还剩 %d 拍" % [tick, target, target - tick]
+  progress.text = "已完成 %d / %d 步 · 还剩 %d 步" % [tick, target, target - tick]
  show_tile(device_tile, "设备端待传\n%d 块" % pending, "waiting" if pending > 0 else "idle")
  show_tile(buffer_tile, "缓冲区当前占用\n%d / %d 块" % [buffered, limit], "info")
  show_tile(program_tile, "程序累计读走\n%d 块" % delivered, "active" if delivered > 0 else "idle")
@@ -343,7 +343,7 @@ func render():
   for column in history_rows[i].size():
    var cell: Label = history_rows[i][column]
    cell.visible = not values.is_empty()
-   if cell.visible: cell.text = ("第 %d 拍" if column == 0 else "%d 块") % values[column]
+   if cell.visible: cell.text = ("第 %d 步" if column == 0 else "%d 块") % values[column]
  render_comparison()
 
 func render_phases(limit: int):
@@ -352,7 +352,7 @@ func render_phases(limit: int):
   show_tile(phases[1], "② 设备放入\n只放进有空位的格子")
   show_tile(phases[2], "③ 程序取走\n从队首开始取")
   return
- show_tile(phases[0], "第 %d 拍 · 放入前\n已占 %d 格，可用 %d 格" % [tick, before_buffer, limit - before_buffer])
+ show_tile(phases[0], "第 %d 步 · 放入前\n已占 %d 格，可用 %d 格" % [tick, before_buffer, limit - before_buffer])
  show_tile(phases[1], "放入后\n%d / %d 块，放入 %d 块" % [before_buffer + this_admitted, limit, this_admitted], "info" if intake_complete else "idle")
  var read_text = "等待你点击「让程序取走」" if intake_complete else "%d / %d 块，取走 %d 块" % [buffered, limit, this_read]
  show_tile(phases[2], "取走后\n" + read_text, "idle" if intake_complete else "active")

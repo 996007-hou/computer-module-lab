@@ -40,7 +40,7 @@ func _ready():
  heading.size_flags_horizontal = Control.SIZE_EXPAND_FILL
  head.add_child(heading)
  present_button = make_button(head, "投屏大字", func(): presentation_requested.emit())
- add_child(make_label("想象只有一台设备可用。进程先领许可才能使用，其他申请者排队，直到有人归还许可。", 18, MUTED, true))
+ add_child(make_label("把信号量想成发放许可的计数器。P 申请使用许可，V 归还许可并在有人排队时唤醒等待者。", 18, MUTED, true))
 
  var walkthrough = add_row()
  demo_start = make_button(walkthrough, "开始课堂示范", _toggle_demo)

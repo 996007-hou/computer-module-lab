@@ -89,6 +89,7 @@ func run_tests():
  app._open_chapter(8)
  var io = chapter.active_lab
  io.load_example()
+ check(io.whole_tick.text == "推进一个时间步", "I/O action uses the same term as the introductory explanation")
  for i in 3: io.advance()
  io.half_tick.pressed.emit()
  check(io.tick == 4 and io.intake_complete and io.buffered == 9 and io.pending == 6 and io.delivered == 9, "last tick shows all nine slots full before reading")
@@ -105,7 +106,7 @@ func run_tests():
  check(io.device_wait_tiles[0].text.contains("设备等空位") and io.program_wait_tiles[1].text.contains("程序等数据") and io.program_wait_tiles[1].text.contains("只取到 6 块"), "comparison identifies which end is waiting and by how much")
  check(io.program_wait_tiles[0].text.contains("程序已取足") and io.device_wait_tiles[1].text.contains("设备未积压"), "the other endpoint is clearly marked as not waiting")
  io.target_ticks.value = 6
- check(io.tick == 0 and io.compare_delivered == 0 and io.progress.text.contains("还剩 6 拍"), "editing the target resets both groups and displays the new end")
+ check(io.tick == 0 and io.compare_delivered == 0 and io.progress.text.contains("还剩 6 步"), "editing the target resets both groups and displays the new end")
  for i in 4: io.advance()
  io.device_rate.value = 0
  io.process_rate.value = 6

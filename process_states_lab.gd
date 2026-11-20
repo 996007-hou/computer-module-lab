@@ -30,7 +30,7 @@ var recommended_style: StyleBoxFlat
 var guide_step := -1
 
 func _ready():
- build_intro("谁在运行，谁在等待？", "用调度、时间片到期和 I/O 事件移动进程，观察就绪队列和进程控制块。")
+ build_intro("谁在运行，谁在等待？", "时间片是一轮调度允许进程连续占用 CPU 的最长时间。让它到期，观察原进程如何让出 CPU。")
  var onboarding = add_row()
  guide_button = make_button(onboarding, "开始新手引导", toggle_guide)
  guide_text = make_label("", 15, MUTED, true)
@@ -54,7 +54,7 @@ func _ready():
  add_lane(lanes, "阻塞队列", "waiting")
  add_feedback()
  add_child(make_label("进程控制块（PCB）", 17))
- add_child(make_label("操作系统用 PCB 记录进程的状态和执行现场。这里用从 0 开始的指令编号表示程序计数器。", 14, MUTED, true))
+ add_child(make_label("PCB 记录进程状态和恢复执行所需的信息。程序计数器记录下一条指令的位置，实验用从 0 开始的指令编号表示。", 14, MUTED, true))
  var pcbs = add_row()
  for i in 2: pcb_rows.append(make_tile(pcbs, 86))
  reset()

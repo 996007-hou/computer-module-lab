@@ -10,7 +10,7 @@ var records: Array[Label] = []
 var bitmap: Label
 
 func _ready():
- build_intro("文件占了磁盘上的哪些块？", "创建、扩展或删除文件。图中磁盘块会立即变化，文件索引会保留各块在文件里的顺序。")
+ build_intro("文件占了磁盘上的哪些块？", "逻辑块号表示数据在文件里的顺序，磁盘块号表示它放在磁盘哪里。创建、扩展或删除文件，观察索引表怎样更新。")
  var controls = add_row()
  file = OptionButton.new()
  for value in FILE_NAMES: file.add_item(value)

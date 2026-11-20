@@ -36,7 +36,7 @@ func _ready():
  title.size_flags_horizontal=Control.SIZE_EXPAND_FILL
  head.add_child(title)
  head.add_child(_label("教材第 5 章 5.5.2 · 课堂示例",13,"667788"))
- var introduction=_label("修改资源数据，检查当前状态，或模拟一次资源请求。",13,"667788")
+ var introduction=_label("先填写资源数据，再检查安全性。Work 表示模拟中的可用资源量，Finish 标记进程是否已在模拟中完成。",13,"667788")
  introduction.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
  add_child(introduction)
  var row=HBoxContainer.new()
@@ -314,7 +314,7 @@ func _render():
   work=info.initial_work
   if step>=2 and not info.trace.is_empty(): work=info.trace[mini(step-2,info.trace.size()-1)].after
  available_label.text=("模拟 Work = " if assumed else "当前可用 Available = ") + _vector(work) + "      Need = Max − Allocation"
- for text in ["进程","最大需求 Max","假设分配" if assumed and not safety_only else "已分配 Allocation","剩余需求 Need","Finish"]: table.add_child(_label(text,13,"667788"))
+ for text in ["进程","最大需求 Max","假设分配" if assumed and not safety_only else "已分配 Allocation","剩余需求 Need","模拟完成 Finish"]: table.add_child(_label(text,13,"667788"))
  for i in info.need.size():
   var max_values: Array=[]
   for j in info.total.size(): max_values.append(info.need[i][j]+info.allocation[i][j])

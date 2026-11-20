@@ -73,7 +73,9 @@ func _ready():
   frame_card.size_flags_horizontal=Control.SIZE_EXPAND_FILL
   snapshot.add_child(frame_card)
   frame_cards.append(frame_card)
- add_child(_label("下图保留每次访问后的页框内容。“缺”表示缺页，“中”表示命中。",13,"667788"))
+ var access_legend=_label("访问的页已在内存叫命中，尚未装入叫缺页。下图用「中」和「缺」记录每次访问。",13,"667788")
+ access_legend.autowrap_mode=TextServer.AUTOWRAP_WORD_SMART
+ add_child(access_legend)
  view=Control.new()
  view.set_script(Grid)
  view.font=font
